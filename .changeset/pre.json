@@ -231,7 +231,25 @@
     "@backstage/plugin-user-settings-backend": "0.1.12",
     "@backstage/plugin-vault": "0.1.15",
     "@backstage/plugin-vault-backend": "0.3.4",
-    "@backstage/plugin-xcmetrics": "0.2.41"
+    "@backstage/plugin-xcmetrics": "0.2.41",
+    "@backstage/plugin-auth-backend-module-gcp-iap-provider": "0.0.0",
+    "@backstage/plugin-auth-backend-module-google-provider": "0.0.0",
+    "@backstage/plugin-opencost": "0.1.0"
   },
-  "changesets": []
+  "changesets": [
+    "create-app-1692292134",
+    "dry-wasps-occur",
+    "empty-rings-type",
+    "few-nails-smile",
+    "healthy-tools-count",
+    "lazy-rice-rule",
+    "mean-carpets-provide",
+    "pink-cups-rescue",
+    "poor-years-appear",
+    "renovate-76185f9",
+    "slow-queens-visit",
+    "strange-frogs-count",
+    "sweet-hairs-complain",
+    "warm-llamas-bake"
+  ]
 }

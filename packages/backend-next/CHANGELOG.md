@@ -1,5 +1,38 @@
 # example-backend-next
 
+## 0.0.15-next.0
+
+### Patch Changes
+
+- Updated dependencies
+  - @backstage/plugin-scaffolder-backend@1.16.1-next.0
+  - @backstage/plugin-auth-node@0.3.0-next.0
+  - @backstage/plugin-entity-feedback-backend@0.1.7-next.0
+  - @backstage/backend-plugin-api@0.6.1-next.0
+  - @backstage/plugin-badges-backend@0.2.4-next.0
+  - @backstage/plugin-catalog-backend@1.12.1-next.0
+  - @backstage/plugin-catalog-backend-module-unprocessed@0.2.1-next.0
+  - @backstage/plugin-devtools-backend@0.1.4-next.0
+  - @backstage/plugin-kubernetes-backend@0.11.4-next.0
+  - @backstage/plugin-linguist-backend@0.4.1-next.0
+  - @backstage/plugin-permission-backend@0.5.24-next.0
+  - @backstage/plugin-permission-node@0.7.12-next.0
+  - @backstage/plugin-search-backend@1.4.1-next.0
+  - @backstage/plugin-app-backend@0.3.49-next.0
+  - @backstage/plugin-proxy-backend@0.3.1-next.0
+  - @backstage/backend-defaults@0.2.1-next.0
+  - @backstage/plugin-adr-backend@0.3.7-next.0
+  - @backstage/plugin-azure-devops-backend@0.3.28-next.0
+  - @backstage/plugin-lighthouse-backend@0.2.5-next.0
+  - @backstage/plugin-search-backend-module-catalog@0.1.5-next.0
+  - @backstage/plugin-search-backend-module-explore@0.1.5-next.0
+  - @backstage/plugin-search-backend-module-techdocs@0.1.5-next.0
+  - @backstage/plugin-search-backend-node@1.2.5-next.0
+  - @backstage/plugin-techdocs-backend@1.6.6-next.0
+  - @backstage/plugin-todo-backend@0.2.1-next.0
+  - @backstage/backend-tasks@0.5.6-next.0
+  - @backstage/plugin-permission-common@0.7.7
+
 ## 0.0.14
 
 ### Patch Changes

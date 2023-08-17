@@ -1,5 +1,16 @@
 # @backstage/config-loader
 
+## 1.4.1-next.0
+
+### Patch Changes
+
+- f9657b891b00: Do not unnecessarily notify subscribers when no-op updates to config happen
+- Updated dependencies
+  - @backstage/cli-common@0.1.12
+  - @backstage/config@1.0.8
+  - @backstage/errors@1.2.1
+  - @backstage/types@1.1.0
+
 ## 1.4.0
 
 ### Minor Changes
