@@ -29,26 +29,34 @@ import {
 import {
   BackstagePackageJson,
   isBackstagePackage,
+  isRejected,
+  isFulfilled,
   readFile,
   writeFile,
 } from './utils';
 import { CodeOwnersEntry } from 'codeowners-utils';
 
 type CreateFixPackageInfoYamlsOptions = {
+  ci?: boolean;
   dryRun?: boolean;
 };
 
 export default async (opts: CreateFixPackageInfoYamlsOptions) => {
-  const { dryRun = false } = opts;
+  const { dryRun = false, ci = false } = opts;
   const packages = await PackageGraph.listTargetPackages();
   const codeowners = await loadCodeowners();
   const limit = pLimit(10);
 
-  const results = await Promise.allSettled<void>(
+  // If --ci is passed, don't make any changes to the file system; we're only
+  // interested in knowing if changes would have been made.
+  const isDryRun = ci ? true : dryRun;
+  const checkForChanges = ci;
+
+  const results = await Promise.allSettled<string>(
     packages.map(({ packageJson, dir }) =>
       limit(async () => {
         if (!isBackstagePackage(packageJson)) {
-          return;
+          return '';
         }
 
         // Check if there is already a corresponding catalog-info.yaml
@@ -59,32 +67,29 @@ export default async (opts: CreateFixPackageInfoYamlsOptions) => {
           yamlString = await readFile(infoYamlPath, { encoding: 'utf-8' });
         } catch (e) {
           if (e.code === 'ENOENT') {
-            await createCatalogInfoYaml({
+            return await createCatalogInfoYaml({
               yamlPath: infoYamlPath,
               packageJson,
               codeowners,
-              dryRun,
+              dryRun: isDryRun,
             });
-            return;
           }
 
           throw e;
         }
 
-        await fixCatalogInfoYaml({
+        return await fixCatalogInfoYaml({
           yamlPath: infoYamlPath,
           packageJson,
           codeowners,
           yamlString,
-          dryRun,
+          dryRun: isDryRun,
         });
       }),
     ),
   );
 
-  const rejects = results.filter(
-    r => r.status === 'rejected',
-  ) as PromiseRejectedResult[];
+  const rejects = results.filter(isRejected);
   if (rejects.length > 0) {
     // Problems encountered. Print details here.
     console.error(
@@ -93,6 +98,28 @@ export default async (opts: CreateFixPackageInfoYamlsOptions) => {
     rejects.forEach(reject => console.error(`  ${reject.reason}`));
     console.error();
     process.exit(1);
+  }
+
+  if (checkForChanges) {
+    const instructions = results
+      .filter(isFulfilled)
+      .map(r => r.value)
+      .filter(r => r !== '');
+
+    // Non-empty instructions indicate changes would have been made.
+    if (instructions.length > 0) {
+      console.error(
+        '\ncatalog-info.yaml file(s) out of sync with CODEOWNERS or package.json\n',
+      );
+      console.error('Did you forget to run and commit the output of...');
+      console.error('  backstage-repo-tools generate-catalog-info');
+      console.error();
+      process.exit(1);
+    } else {
+      console.error(
+        'catalog-info.yaml files are in sync with CODEOWNERS and package.json',
+      );
+    }
   }
 };
 
@@ -117,17 +144,22 @@ type BackstagePackageEntity = Entity & {
   };
 };
 
-function createCatalogInfoYaml(options: CreateOptions) {
+async function createCatalogInfoYaml(options: CreateOptions) {
   const { codeowners, dryRun, packageJson, yamlPath } = options;
+  const instruction = `Create ${relativePath('.', yamlPath)}`;
   const owner = getOwnerFromCodeowners(codeowners, yamlPath);
   const entity = createOrMergeEntity(packageJson, owner);
 
-  return dryRun
-    ? Promise.resolve(console.error(`Create ${relativePath('.', yamlPath)}`))
-    : writeFile(yamlPath, YAML.dump(entity));
+  if (dryRun) {
+    console.error(instruction);
+  } else {
+    await writeFile(yamlPath, YAML.dump(entity));
+  }
+
+  return instruction;
 }
 
-function fixCatalogInfoYaml(options: FixOptions) {
+async function fixCatalogInfoYaml(options: FixOptions) {
   const { codeowners, dryRun, packageJson, yamlPath, yamlString } = options;
   const possibleOwners = getPossibleCodeowners(
     codeowners,
@@ -156,12 +188,18 @@ function fixCatalogInfoYaml(options: FixOptions) {
       ? getOwnerFromCodeowners(codeowners, yamlPath)
       : yamlJson.spec?.owner;
     const newJson = createOrMergeEntity(packageJson, owner, yamlJson);
-    return dryRun
-      ? Promise.resolve(console.error(`Update ${relativePath('.', yamlPath)}`))
-      : writeFile(yamlPath, yamlOverwrite(yamlString, newJson));
+    const instruction = `Update ${relativePath('.', yamlPath)}`;
+
+    if (dryRun) {
+      console.error(instruction);
+    } else {
+      await writeFile(yamlPath, yamlOverwrite(yamlString, newJson));
+    }
+
+    return instruction;
   }
 
-  return Promise.resolve();
+  return '';
 }
 
 /**
